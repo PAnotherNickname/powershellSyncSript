@@ -35,6 +35,12 @@ function Sync-Folders {
         Write-Host $logEntry
     }
 
+
+    # Add separator line to the beginning of the log file
+    "----------------------------------------------------------------------------------------------------------------------" | Out-File -FilePath $logFile -Append
+    $timestampBegin = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "$timestampBegin - Attempt to synchronize the folders" | Out-File -FilePath $logFile -Append
+    
     # Function to copy files recursively
     function Copy-Files {
         param (
