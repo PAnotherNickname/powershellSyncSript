@@ -2,7 +2,9 @@ param (
     [string]$sourceFolder,
     [string]$replicaFolder,
     [string]$logFilePath,
-    [switch]$help
+    [switch]$help,
+    [switch]$stopScript,
+    [int]$interval = 0
 )
 
 if ($help) {
@@ -10,6 +12,8 @@ if ($help) {
     Write-Host "  -sourceFolder       Specifies the path to the source folder."
     Write-Host "  -replicaFolder      Specifies the path to the replica folder."
     Write-Host "  -logFilePath        Specifies the path to the log file."
+    Write-Host "  -interval           Specifies the time interval (in minutes) for script execution. If not provided, the script will run only once."
+    Write-Host "  -stopScript         Stops the running SyncFolders.ps1 script."
     Write-Host "  -help               Displays this help message."
     Write-Host ""
     Write-Host "Example: SyncFolders.ps1 -sourceFolder <source folder path> -replicaFolder <replica folder path> -logFilePath <log file path>"
@@ -97,4 +101,36 @@ function Sync-Folders {
     Delete-Files -source $source -destination $replica
 }
 
+# Check if -stopScript modifier is provided
+if ($stopScript) {
+    $tempFile = "$env:TEMP\SyncFolders.tmp"
+    if (Test-Path $tempFile) {
+        $pidToStop = Get-Content $tempFile
+        if ($pidToStop -match '\d+') {
+            Stop-Process -Id $pidToStop
+            Write-Host "Script with PID $pidToStop has been stopped."
+        }
+        else {
+            Write-Host "Invalid PID found in $tempFile."
+        }
+        Remove-Item $tempFile -Force
+    }
+    else {
+        Write-Host "SyncFolders.tmp file not found in the temp directory."
+    }
+    Exit
+}
+
+# synchronize function 
 Sync-Folders -source $sourceFolder -replica $replicaFolder -logFile $logFilePath
+
+
+# Check if interval is specified, if yes, schedule the script execution
+if ($interval -gt 0) {
+    $PID | Out-File -FilePath $env:TEMP\SyncFolders.tmp
+    Write-Host "Script will run at intervals of $interval minutes. Press Ctrl+C to stop."
+    while ($true) {
+        Start-Sleep -Seconds ($interval * 60)  
+        Sync-Folders -source $sourceFolder -replica $replicaFolder -logFile $logFilePath
+    }
+}
