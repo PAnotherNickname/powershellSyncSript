@@ -1,7 +1,7 @@
 param (
     [string]$sourceFolder,
     [string]$replicaFolder,
-    [string]$logFilePath,
+    [string]$logFilePath = "$env:TEMP\LogFile.txt",
     [switch]$help,
     [switch]$stopScript,
     [int]$interval = 0
