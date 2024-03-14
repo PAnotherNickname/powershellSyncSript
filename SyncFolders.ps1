@@ -1,10 +1,22 @@
 param (
+    [Parameter(Mandatory=$true, Position=0, ParameterSetName="Sync")]
     [string]$sourceFolder,
+
+    [Parameter(Mandatory=$true, Position=1, ParameterSetName="Sync")]
     [string]$replicaFolder,
+
+    [Parameter(Mandatory=$false, ParameterSetName="Sync")]
     [string]$logFilePath = "$env:TEMP\LogFile.txt",
+
+    [Parameter(Mandatory=$false, ParameterSetName="Sync")]
+    [int]$interval = 0,
+
+    [Parameter(ParameterSetName="Help")]
     [switch]$help,
-    [switch]$stopScript,
-    [int]$interval = 0
+
+    [Parameter(ParameterSetName="Stop")]
+    [switch]$stopScript
+
 )
 
 if ($help) {
